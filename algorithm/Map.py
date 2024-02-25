@@ -1,5 +1,4 @@
 from utils import IO, Folium, Geo, Here
-import folium
 
 class Map:
     def __init__(self, parameters, instance, solution):
@@ -8,14 +7,15 @@ class Map:
         self.Folium = Folium()
         self.Geo = Geo()
         self.Here = Here()
-
         self.parameters = parameters
         self.instance = instance
         self.solution = solution
-
         self.create_map_data()
 
+
     def create_map_data(self):
+        """
+        """
         self.logo_img_file = self.parameters.input_file_path + 'map/logo.png'
         self.colors_dataframe = self.IO.read_csv(file_path=self.parameters.input_file_path + 'map/HEXADECIMAL_COLORS.csv', separator=';', encoding='utf-8', decimal=',') # Dataframe con los colores
         self.colors = self.Folium.get_input_colors(self.colors_dataframe, 0) # Lista desordenada de colores en hexadecimal
@@ -26,12 +26,11 @@ class Map:
         depot_coords = [depot_info['Latitude'].values[0], depot_info['Longitude'].values[0]]
         self.map_object = self.Folium.initialize_folium_map(depot_coords, self.logo_img_file)
 
+
     def draw_map(self):
         """
         Main Method: Creates HTML MAP USING FOLIUM
         """
-        
-
         self.draw_zip_codes()
         self.draw_nodes()
         self.draw_heat_map()
@@ -83,6 +82,7 @@ class Map:
                 province = node['Province']
                 zip_code = node['Zip_Code']
                 node_type = node['Node_Type']
+                items = node['Items']
                 weight = node['Weight']
                 lat = node['Latitude']
                 long = node['Longitude']
@@ -90,15 +90,14 @@ class Map:
                 icon_name = self.get_icon_name(node_type)
                 #print(node_type, icon_name)
                 tooltip_folium = 'Node: ' + str(node_id) + '-' + str(node_name)
-                self.add_html_node(nodes_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, weight, lat, long, icon_name)
+                self.add_html_node(nodes_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, items, weight, lat, long, icon_name)
 
     
     def draw_routes(self):
         """
         """
         routes_df_list = self.IO.cluster_dataframe_by_condition(self.solution.result_df, 'Vehicle')
-
-        layer_color = '#FF0000'
+        layer_color = '#931314' # '#931314' Saffron Red
         initial_show = False
         dynamic = False
         index_color = 0
@@ -109,6 +108,7 @@ class Map:
             node_color, index_color = self.Folium.get_node_color(index_color, self.colors_high_contrast)
             latitudes = list()
             longitudes = list()
+            stops_counter = 0
             for index, node_df in route_df.iterrows():
                 node_id = node_df['Id']
                 node_name = node_df['Name']
@@ -117,6 +117,7 @@ class Map:
                 province = node_df['Province']
                 zip_code = node_df['Zip_Code']
                 node_type = node_df['Node_Type']
+                items = node_df['Items']
                 weight = node_df['Weight']
                 lat = node_df['Latitude']
                 long = node_df['Longitude']
@@ -124,10 +125,10 @@ class Map:
                 latitudes.append(lat)
                 longitudes.append(long)
 
-                icon_name = self.get_icon_name(node_type)
                 #print(node_type, icon_name)
                 tooltip_folium = 'Node: ' + str(node_id) + '-' + str(node_name)
-                self.add_html_node(route_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, weight, lat, long, icon_name)
+                self.add_route_html_node(route_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, items, weight, lat, long, stops_counter)
+                stops_counter = stops_counter + 1
 
             coordinates = self.Geo.create_list_of_list_coordinates(latitudes, longitudes)
             if len(coordinates) > 2:
@@ -161,11 +162,11 @@ class Map:
         icon_dict = {'PSIQUIÁTRICO': 'glyphicon-filter',
         'MÉDICO-QUIRÚRGICO': 'glyphicon-plus-sign',
         'GENERAL': 'glyphicon-plus',
-        'GERIATRÍA Y/O LARGA ESTANCIA': 'glyphicon-apple',
-        'REHABILITACIÓN PSICOFÍSICA': 'glyphicon-apple',
+        'GERIATRÍA Y/O LARGA ESTANCIA': 'glyphicon-euro',
+        'REHABILITACIÓN PSICOFÍSICA': 'glyphicon-cloud',
         'MATERNO-INFANTIL': 'glyphicon-asterisk',
-        'QUIRÚRGICO': 'glyphicon-apple',
-        'INFANTIL': 'glyphicon-apple',
+        'QUIRÚRGICO': 'glyphicon-trash',
+        'INFANTIL': 'glyphicon-headphones',
         'TRAUMATOLOGÍA Y/O REHABILITACIÓN': 'glyphicon-cog',
         'OTROS MONOGRÁFICOS': 'glyphicon-ice-lolly',
         'OFTÁLMICO U ORL': 'glyphicon-eye-open',
@@ -178,14 +179,14 @@ class Map:
             icon_name = icon_dict[node_type]
         except:
             icon_name = 'glyphicon-tint'
-        return icon_name
+        return 'glyphicon-plus-sign' #icon_name
     
 
-    def add_html_node(self, nodes_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, weight, lat, long, icon_name):
+    def add_html_node(self, nodes_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, items, weight, lat, long, icon_name):
         """
         """
-        left_col_color = '#36454F'
-        right_col_color = '#FBFBF9'
+        left_col_color = '#36454F' # Row left color
+        right_col_color = '#FBFBF9' # Row right color
 
         html = self.Folium.add_beggining_HTML_table(node_id)
         html = html + self.Folium.add_row_to_HTML_table('Identificador Nodo', node_id, None, left_col_color, right_col_color)
@@ -195,20 +196,48 @@ class Map:
         html = html + self.Folium.add_row_to_HTML_table('Provincia', province, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Código Postal', zip_code, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Tipo Nodo', node_type, None, left_col_color, right_col_color)
+        html = html + self.Folium.add_row_to_HTML_table('Pallets', items, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Peso', weight, 'kg.', left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Latitud', lat, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Longitud', long, None, left_col_color, right_col_color)
         html = html + self.Folium.add_end_HTML_table()
 
-        tooltip_folium = 'NODO: ' + str(node_id)
-        popUP = folium.Popup(folium.Html(html, script=True), max_width=500)
-        folium.Marker(location=[lat, long],
-                    popup=popUP,
-                    tooltip=tooltip_folium, 
-                    name=node_name, 
-                    icon=folium.Icon(color='black', icon=icon_name, icon_color=node_color)).add_to(nodes_layer)
-                    #   icon=folium.Icon(color='cadetblue', icon=icon_name, icon_color=node_color, prefix='fa')).add_to(nodes_layer)
-        
+        location = [lat, long]
+        popup = self.Folium.create_pop_up(html)
+        tooltip_folium = 'Node: ' + str(node_id)
+        color = 'black'
+        icon = self.Folium.create_icon(icon_name, node_color, color)
+        self.Folium.create_marker(location, popup, tooltip_folium, node_name, icon, nodes_layer)
+
+
+    def add_route_html_node(self, nodes_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, items, weight, lat, long, stops_counter):
+        """
+        """
+        left_col_color_1 = '#2C3539' # Even row left color
+        right_col_color_1 = '#FBFBF9' # Even row right color
+        left_col_color_2 = '#36454F' # Odd row left color
+        right_col_color_2 = '#FAF5EF' # Odd row right color
+
+        html = self.Folium.add_beggining_HTML_table(node_name)
+        html = html + self.Folium.add_row_to_HTML_table('Identificador Nodo', node_id, None, left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Nombre', node_name, None, left_col_color_2, right_col_color_2)
+        html = html + self.Folium.add_row_to_HTML_table('Dirección', address, None, left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Localidad', location, None, left_col_color_2, right_col_color_2)
+        html = html + self.Folium.add_row_to_HTML_table('Provincia', province, None, left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Código Postal', zip_code, None, left_col_color_2, right_col_color_2)
+        html = html + self.Folium.add_row_to_HTML_table('Tipo Nodo', node_type, None, left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Pallets', items, None, left_col_color_2, right_col_color_2)
+        html = html + self.Folium.add_row_to_HTML_table('Peso', weight, 'kg.', left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Latitud', lat, None, left_col_color_2, right_col_color_2)
+        html = html + self.Folium.add_row_to_HTML_table('Longitud', long, None, left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_end_HTML_table()
+
+        location = [lat, long]
+        popup = self.Folium.create_pop_up(html)
+        tooltip_folium = 'Node: ' + str(node_id)
+        icon = self.Folium.create_circle_icon(node_color, stops_counter)
+        self.Folium.create_marker(location, popup, tooltip_folium, node_name, icon, nodes_layer)
+
 
     def draw_heat_map(self):
         """

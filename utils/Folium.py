@@ -4,7 +4,7 @@ import pandas as pd
 import random
 import folium
 import base64
-from folium.plugins import MarkerCluster, Search, MeasureControl, LocateControl, MiniMap, FeatureGroupSubGroup, Fullscreen, AntPath, PolyLineOffset, HeatMap, StripePattern, Geocoder
+from folium.plugins import MarkerCluster, Search, MeasureControl, LocateControl, MiniMap, FeatureGroupSubGroup, Fullscreen, AntPath, PolyLineOffset, HeatMap, StripePattern, Geocoder, BeautifyIcon
 
 
 class Folium:
@@ -36,8 +36,9 @@ class Folium:
         Return:
         map_object -- Objeto Folium que se exporta como fichero HTML
         """
-        map_object = folium.Map(location=center_coords, tiles="openstreetmap", zoom_start=10, control_scale=True, name='Open Street Map')
-        Fullscreen(position='topleft').add_to(map_object)
+        
+        map_object = folium.Map(location=center_coords, tiles="OpenStreetMap", zoom_start=10, control_scale=True)
+        Fullscreen(position='topleft', title="Expand me", title_cancel="Exit me").add_to(map_object)
         self.add_logo_to_markers(logo_img_file, map_object)
         return map_object
 
@@ -51,7 +52,7 @@ class Folium:
         """
         folium.TileLayer('openstreetmap', name='Open Street Map').add_to(map_object)
         folium.TileLayer('cartodbpositron', name='Carto BD Positron').add_to(map_object)
-        MiniMap(tile_layer='cartodbpositron', position='bottomleft', toggle_display=True).add_to(map_object)
+        MiniMap(tile_layer='Cartodb dark_matter', position='bottomleft', toggle_display=True).add_to(map_object)
         MeasureControl(position='bottomleft').add_to(map_object)
         Geocoder(position='topleft', collapsed=True, placeholder="Geocoder Folium").add_to(map_object)
         folium.LayerControl(collapsed=False).add_to(map_object)
@@ -61,6 +62,72 @@ class Folium:
         map_object.save(file_name + '.html')
         print("File MAP: ", file_name, ' created.')
 
+
+    def create_marker(self, location, popup, tooltip_folium, node_name, icon, folium_layer):
+        """
+        Creates Folium Marker
+
+        Parametros:
+        location -- Array [latitude, longitude]
+        popup -- Folium pop up object
+        tooltip_folium -- String shown when hover over the marker
+        node_name -- Marker Id, if we add search
+        icon -- Folium icon object
+        folium_layer -- Folium layer
+        """
+        folium.Marker(location=location, popup=popup, tooltip=tooltip_folium, name=node_name, icon=icon).add_to(folium_layer)
+
+
+    def create_icon(self, icon_name, icon_color, color):
+        """
+        Creates a Folium Icon
+
+        Parametros:
+        icon_name -- Hexadecimal color of the node
+        icon_color -- Hexadecimal color of the node
+        color -- Folium Color for the marker. ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple', 'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray']
+        prefix -- Prefix if we use FontAwesome Markers
+        angle -- Angle of the icon: 45, 90, 135, 180.
+
+        Return:
+        icon -- Folium Icon
+        """
+        icon = folium.Icon(color=color, icon=icon_name, icon_color=icon_color)
+        # if prefix == None:
+        #     icon = folium.Icon(color=color, icon=icon_name, icon_color=icon_color, angle=angle)
+        # else:
+        #     icon = folium.Icon(color=color, icon=icon_name, icon_color=icon_color, prefix=prefix, angle=angle)
+        return icon
+
+
+    def create_circle_icon(self, color, number):
+        """
+        Creates a Folium Circle Icon With Number
+
+        Parametros:
+        color -- Hexadecimal color of the node
+        number -- Number inside the marker
+
+        Return:
+        icon -- Folium Circle Icon With Number
+        """
+        icon = BeautifyIcon(border_color=color,text_color=color,number=number,inner_icon_style="margin-top:0;")
+        return icon
+    
+    
+    def create_pop_up(self, html):
+        """
+        Creates a Folium Pop Up.
+
+        Parametros:
+        html -- HTML Code within the pop up
+
+        Return:
+        pop_up -- Folium Pop Up
+        """
+        pop_up = folium.Popup(folium.Html(html, script=True), max_width=500)
+        return pop_up
+    
 
     def add_logo_to_markers(self, logo_img_file, map_object):
         """
@@ -88,7 +155,7 @@ class Folium:
 
     def add_beggining_HTML_table(self, node_id):
         """
-        Crea el principio de una tabla hatml con formato
+        Crea el principio de una tabla html con formato
         """
         html = """
         <!DOCTYPE html>
@@ -104,7 +171,7 @@ class Folium:
 
     def add_end_HTML_table(self):
         """
-        Crea el final de una tabla hatml con formato
+        Crea el final de una tabla html con formato
         """
         html = """</tbody></table></center>
         <center><strong>hosted by <span style="font-family: 'system-ui'; font-size: 30px; color:#36454F">{}</span>""".format('Route66') + """</strong></center>

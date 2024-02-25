@@ -1,4 +1,5 @@
 import numpy as np
+import time
 from scipy.spatial.distance import cdist, pdist, squareform
 from scipy.cluster.hierarchy import fcluster, linkage
 
@@ -21,9 +22,17 @@ class Individual:
 
         print(client_demands, vehicle_capacities)
         # Initial Solution
-        print("Creating Initial Solution...")
+        print("Start Creating Initial Solution...")
         self.initialize_routes()
+        print("End Creating Initial Solution...")
+
+        print("Start Improving Each Initial Route...")
         self.improve_single_route()
+        print("End Improving Each Initial Route. Current Fitness:", self.fitness)
+
+        print("Start Improving Routes...")
+        self.improve_routes()
+        print("End Improving Routes...")
 
 
     def initialize_routes(self):
@@ -83,7 +92,7 @@ class Individual:
                     route.nodes.append(current_node)
                 route.nodes.append(depot_node) # Add depot end
 
-                route.fitness = route.calculate_route_distance()
+                route.fitness = route.calculate_route_distance(route.nodes)
                 route.load = route.calculate_route_load()
                 initial_routes.append(route)
 
@@ -94,19 +103,35 @@ class Individual:
     def improve_single_route(self):
         
         print("Executing 2-opt, 3-opt...")
+        solution_fitness = 0
         for route in self.routes:
             print('Mejorando Ruta:', route.id, '... FITNESS:', route.fitness)
+
             route.two_opt() # Apply 2-opt to each route
             print('\tFitness tras 2-opt:', route.id, '... FITNESS:', route.fitness)
 
-            route.three_opt_first_improvement() # Apply 3-opt to each route
-            print('\tFitness tras 3-opt:', route.id, '... FITNESS:', route.fitness)
-            print('----------------------------------------------------------------')
+            route.three_opt_first_improvement() # Apply 3-opt first improvent to each route
+            print('\tFitness tras 3-opt first improvement:', route.id, '... FITNESS:', route.fitness)
 
+            route.three_opt() # Apply 3-opt to each route
+            print('\tFitness tras 3-opt:', route.id, '... FITNESS:', route.fitness)
+
+            route.lin_kernighan(max_iter=10000, max_time_seconds=60) # Apply lin_kernighan to each route
+            print('\tFitness tras lin_kernighan:', route.id, '... FITNESS:', route.fitness)
+
+            solution_fitness = solution_fitness + route.fitness
+            print('----------------------------------------------------------------')
+        self.fitness = solution_fitness
+
+    def improve_routes(self):
+        i = 0
 
     def print_solution(self):
         for route in self.routes:
             print(route)
 
     def __str__(self) -> str:
-        print('Individual:', self.is_valid, ' Fitness:', self.fitness)
+        ind_str = 'Fitness: ' + str(self.fitness) + '\n'
+        for route in self.routes:
+            ind_str += str(route) + '\n'
+        return ind_str

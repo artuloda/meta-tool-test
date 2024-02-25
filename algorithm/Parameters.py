@@ -11,7 +11,7 @@ class Parameters:
         self.input_file_name = str(parameters_dict['input_file_name'])
         self.fleet_file_name = str(parameters_dict['fleet_file_name'])
         self.here_API_key = str(parameters_dict['here_API_key'])
-        self.city_name_zip_code_list = parameters_dict['city_name_zip_code_list'].split(',')
+        self.city_name_zip_code_list = eval(parameters_dict['city_name_zip_code_list'])
         self.TAM_POPULATION = int(parameters_dict['TAM_POPULATION'])
 
     def __str__(self) -> str:

@@ -1,9 +1,14 @@
 import algorithm
+import numpy as np
+import time
 
 
 # def main():
 if __name__ == '__main__':
-    
+    start_time = time.time()
+    random_seed = 123456789
+    np.random.seed(random_seed)
+
     # Read Parameters
     parameters = algorithm.Parameters()
     print(parameters)
@@ -13,9 +18,17 @@ if __name__ == '__main__':
     print(instance.nodes_df)
     print(instance.fleet_df)
 
-    algorithm.Solution(parameters, instance)
-    
+    solution = algorithm.Solution(parameters, instance)
 
+    print('____________________________________________________________________________________')
+    print('------------------------------------------------------------------------------------')
+    print('                                    END ALGORITHM                                   ')
+    print('____________________________________________________________________________________')
+    print('------------------------------------------------------------------------------------')
+    end_time = time.time()
+    print(solution.best_solution)
+    print('Best FITNESS:', solution.fitness)
+    print("Total Execution Time: " + str(round(end_time - start_time, 2)) + "s")
     # Execute Algorithm
     #result_dict, result_df = algorithm.main(input_file_path, output_file_path, nodes_df, vehicles_df)
     # result_dict, result_df = cvrp.main(input_file_path, output_file_path, nodes_df, vehicles_df)

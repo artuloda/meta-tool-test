@@ -9,7 +9,7 @@ class Geo:
     def calculate_distance(self, coord1, coord2):
         """
         Calculates distance in kilometers"""
-        return math.ceil(geodesic(coord1, coord2).meters)
+        return math.ceil(geodesic(coord1, coord2).kilometers)
 
     def signed_polygon_area(self, vertices):
         """Calcula el area de un poligono utilizando su lista de vertices."""

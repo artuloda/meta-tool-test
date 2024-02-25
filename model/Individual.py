@@ -17,11 +17,7 @@ class Individual:
 
     # Main function to solve the CVRP
     def solve_cvrp(self):
-        client_demands =  self.instance.nodes_df['Items'].tolist()  # Agregar los pesos de los nodos
-        vehicle_capacities =  self.instance.fleet_df['Capacity'].tolist()  # Capacidades de los vehículos
 
-        print(client_demands, vehicle_capacities)
-        # Initial Solution
         print("Start Creating Initial Solution...")
         self.initialize_routes()
         print("End Creating Initial Solution...")

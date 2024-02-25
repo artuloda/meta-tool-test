@@ -19,22 +19,16 @@ if __name__ == '__main__':
     print(instance.fleet_df)
 
     solution = algorithm.Solution(parameters, instance)
-
-    print('____________________________________________________________________________________')
-    print('------------------------------------------------------------------------------------')
-    print('                                    END ALGORITHM                                   ')
-    print('____________________________________________________________________________________')
-    print('------------------------------------------------------------------------------------')
-    end_time = time.time()
+    solution.save_solution()    
     print(solution.best_solution)
     print('Best FITNESS:', solution.fitness)
-    print("Total Execution Time: " + str(round(end_time - start_time, 2)) + "s")
-    # Execute Algorithm
-    #result_dict, result_df = algorithm.main(input_file_path, output_file_path, nodes_df, vehicles_df)
-    # result_dict, result_df = cvrp.main(input_file_path, output_file_path, nodes_df, vehicles_df)
+    
 
     # # Draw Result into Map
     # draw_map.main(nodes_df, vehicles_df, result_dict, input_file_path, output_file_path, depot_info, city_name_zip_code_list, here_API_key)
+
+    end_time = time.time()
+    print("Total Execution Time: " + str(round(end_time - start_time, 2)) + "s")
 
 
 # def main(input_file_path, output_file_path, here_API_key):

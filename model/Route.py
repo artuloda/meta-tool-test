@@ -169,12 +169,8 @@ class Route:
             total_iterations += 1
 
 
-
-
-
-
     def __str__(self) -> str:
-        route_str = 'Vehicle: ' +  str(self.vehicle.name) + ' Fitness: ' +  str(self.fitness) + ' Load: ' +  str(self.load) + ' Total Nodes: ' +  str(len(self.nodes)) + ' ---> '
+        route_str = 'Vehicle: ' +  str(self.vehicle.name) + ' Fitness: ' +  str(self.fitness) + ' Load: ' +  str(self.load) + ' Total Nodes: ' +  str(len(self.nodes) - 2) + ' ---> '
         for node in self.nodes:
             route_str += str(node.id) + '-'
         return route_str[:-1]

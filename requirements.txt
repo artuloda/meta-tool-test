@@ -8,3 +8,4 @@ flexpolyline
 geopy
 shapely
 Flask
+scikit-learn

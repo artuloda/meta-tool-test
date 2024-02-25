@@ -1,5 +1,7 @@
 from utils import IO, Geo
 
+from scipy.spatial.distance import cdist
+
 class Instance:
 
     def __init__(self, parameters):  
@@ -73,22 +75,12 @@ class Instance:
         return fleet_df
     
 
+    # Function to create a distance matrix using geodesic distance
     def create_distance_matrix(self):
-        """
-        Create distance matrix
-        
-        Output:
-            - distance_matrix
-        """
+        print("Creating distance matrix...")
         coordinates = self.nodes_df[['Latitude', 'Longitude']].values
-        num_nodes = len(coordinates)
-        distance_matrix = [[0] * num_nodes for _ in range(num_nodes)]
-        for i in range(num_nodes):
-            for j in range(num_nodes):
-                lat1, lon1 = coordinates[i]
-                lat2, lon2 = coordinates[j]
-                coord1 = (lat1, lon1)
-                coord2 = (lat2, lon2)
-                distance_matrix[i][j] = self.Geo.calculate_distance(coord1, coord2)   
+        def dist_func(u, v):
+            return self.Geo.calculate_distance((u[0], u[1]), (v[0], v[1]))
+        distance_matrix = cdist(coordinates, coordinates, metric=dist_func)
         return distance_matrix
-
+    

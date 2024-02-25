@@ -13,6 +13,9 @@ if __name__ == '__main__':
     print(instance.nodes_df)
     print(instance.fleet_df)
 
+    algorithm.Solution(parameters, instance)
+    
+
     # Execute Algorithm
     #result_dict, result_df = algorithm.main(input_file_path, output_file_path, nodes_df, vehicles_df)
     # result_dict, result_df = cvrp.main(input_file_path, output_file_path, nodes_df, vehicles_df)

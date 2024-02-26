@@ -1,6 +1,7 @@
 Parameter;Value
 input_file_path;input_files/
 output_file_path;output_files/
+static_map_path;static/map/
 input_file_name;hospitalesEspanaDataSet.csv
 fleet_file_name;vehicles.csv
 here_API_key;cW7fYkl9rgzC2epupFUTZW1gAk56Y9PUnR_bRq6ltgI

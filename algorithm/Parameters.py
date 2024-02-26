@@ -8,6 +8,7 @@ class Parameters:
         parameters_dict = dict(zip(parameters_df['Parameter'], parameters_df['Value']))
         self.input_file_path = str(parameters_dict['input_file_path'])
         self.output_file_path = str(parameters_dict['output_file_path'])
+        self.static_map_path = str(parameters_dict['static_map_path'])
         self.input_file_name = str(parameters_dict['input_file_name'])
         self.fleet_file_name = str(parameters_dict['fleet_file_name'])
         self.here_API_key = str(parameters_dict['here_API_key'])
@@ -17,6 +18,7 @@ class Parameters:
     def __str__(self) -> str:
         class_str = 'Instance input_file_path: ' + str(self.input_file_path) + '\n'
         class_str += 'Instance output_file_path: ' + str(self.output_file_path) + '\n'
+        class_str += 'Instance static_map_path: ' + str(self.static_map_path) + '\n'
         class_str += 'Instance input_file_name: ' + str(self.input_file_name) + '\n'
         class_str += 'Instance fleet_file_name: ' + str(self.fleet_file_name) + '\n'
         class_str += 'Instance here_API_key: ' + str(self.here_API_key) + '\n'

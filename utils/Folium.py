@@ -287,7 +287,7 @@ class Folium:
         """
         TODO COMMENT
         """
-        folder_path = folder_path + 'map/SPAIN_geojsons'
+        folder_path = folder_path + 'SPAIN_geojsons'
         files = os.listdir(folder_path) # List all files in the specified folder
         print("Files in the folder:") # Print the list of files
         print(files)

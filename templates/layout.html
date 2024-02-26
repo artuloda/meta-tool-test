@@ -1,0 +1,45 @@
+<!-- templates/layout.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Descripción de la página">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="URL de la página">
+    <meta property="og:title" content="Título de la página">
+    <meta property="og:description" content="Descripción de la página">
+    <meta property="og:image" content="URL de la imagen destacada">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+
+    <title>Tu Aplicación</title>
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='map/logo_black.png') }}" alt="Logo" id="logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('home') }}">Inicio</a></li>
+                <li><a href="{{ url_for('clientes') }}">Clientes</a></li>
+                <li><a href="{{ url_for('vehiculos') }}">Flota</a></li>
+                <li><a href="{{ url_for('mapa') }}">Mapa</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 Tu Aplicación. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>
+
+

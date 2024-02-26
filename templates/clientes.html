@@ -1,0 +1,68 @@
+<!-- templates/clientes.html -->
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Lista de Clientes</h1>
+    <div class="filter-container">
+        <label for="columnFilter">Filtrar por Columna:</label>
+        <select id="columnFilter" onchange="updateFilterColumn()">
+            {% for col in data.columns %}
+                <option value="{{ col|lower }}">{{ col }}</option>
+            {% endfor %}
+        </select>
+        <label for="valueFilter">Valor a Filtrar:</label>
+        <input type="text" id="valueFilter" onkeyup="filterTable()">
+    </div>
+    <table id="clientesTable">
+        <thead>
+            <tr>
+                {% for col in data.columns %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, row in data.iterrows() %}
+                <tr>
+                    {% for col in data.columns %}
+                        <td>{{ row[col] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function updateFilterColumn() {
+            var select = document.getElementById("columnFilter");
+            var input = document.getElementById("valueFilter");
+            input.placeholder = "Filtrar por " + select.options[select.selectedIndex].text;
+            filterTable();
+        }
+
+        function filterTable() {
+            var input, filter, table, tr, td, i, txtValue, columnIndex;
+            input = document.getElementById("valueFilter");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("clientesTable");
+            tr = table.getElementsByTagName("tr");
+
+            var select = document.getElementById("columnFilter");
+            columnIndex = select.selectedIndex;
+
+            for (i = 1; i < tr.length; i++) {  // Comienza desde 1 para evitar la fila de encabezado
+                td = tr[i].getElementsByTagName("td")[columnIndex];  // Columna seleccionada
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+{% endblock %}
+
+

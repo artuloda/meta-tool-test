@@ -1,0 +1,27 @@
+<!-- templates/index.html -->
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="hero-section">
+        <h1>Bienvenido Figura</h1>
+        <p>Explora las funcionalidades de nuestra plataforma.</p>
+    </div>
+    <div class="features-section">
+        <div class="features-grid">
+            <a href="{{ url_for('clientes') }}" class="feature-item">
+                <h3>Clientes</h3>
+                <p>Administra y visualiza información sobre clientes.</p>
+            </a>
+            <a href="{{ url_for('vehiculos') }}" class="feature-item">
+                <h3>Flota</h3>
+                <p>Gestiona tu flota de vehículos.</p>
+            </a>
+            <a href="{{ url_for('mapa') }}" class="feature-item">
+                <h3>Mapa</h3>
+                <p>Visualiza en el mapa.</p>
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+

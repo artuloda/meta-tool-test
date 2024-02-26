@@ -16,11 +16,11 @@ class Map:
     def create_map_data(self):
         """
         """
-        self.logo_img_file = self.parameters.input_file_path + 'map/logo.png'
-        self.colors_dataframe = self.IO.read_csv(file_path=self.parameters.input_file_path + 'map/HEXADECIMAL_COLORS.csv', separator=';', encoding='utf-8', decimal=',') # Dataframe con los colores
+        self.logo_img_file = self.parameters.static_map_path + 'logo_white.png'
+        self.colors_dataframe = self.IO.read_csv(file_path=self.parameters.static_map_path + 'HEXADECIMAL_COLORS.csv', separator=';', encoding='utf-8', decimal=',') # Dataframe con los colores
         self.colors = self.Folium.get_input_colors(self.colors_dataframe, 0) # Lista desordenada de colores en hexadecimal
         self.colors_high_contrast = self.Folium.get_input_colors(self.colors_dataframe, 1) # Lista desordenada de colores en hexadecimal
-        self.spain_zip_codes_data = self.Folium.get_spain_zip_codes(self.parameters.input_file_path)
+        self.spain_zip_codes_data = self.Folium.get_spain_zip_codes(self.parameters.static_map_path)
 
         depot_info = self.instance.nodes_df[self.instance.nodes_df['Node_Type'] == 'Depot']
         depot_coords = [depot_info['Latitude'].values[0], depot_info['Longitude'].values[0]]
@@ -36,7 +36,7 @@ class Map:
         self.draw_heat_map()
         self.draw_routes()  
 
-        output_file_name = self.parameters.output_file_path + 'result_map'
+        output_file_name = self.parameters.static_map_path + 'result_map'
         self.Folium.create_folium_map(output_file_name, self.map_object) # Guarda el mapa en formato .html y ajusta ciertos parametros del mapa
 
 
@@ -132,12 +132,12 @@ class Map:
 
             coordinates = self.Geo.create_list_of_list_coordinates(latitudes, longitudes)
             if len(coordinates) > 2:
-                route_info_here = self.Here.calculate_route_HERE(coordinates, 'car', self.parameters.here_API_key)
-                route_coordinates_here = route_info_here[0]
-                route_distance = route_info_here[1]
-                route_time = route_info_here[2]
-                print('La ruta:', layer_txt, ' tiene una distancia de ', route_distance, ' y un tiempo de ', route_time)
-                self.Folium.add_route_to_map(route_coordinates_here, node_color, layer_txt, route_layer, 2)
+                # route_info_here = self.Here.calculate_route_HERE(coordinates, 'car', self.parameters.here_API_key)
+                # route_coordinates_here = route_info_here[0]
+                # route_distance = route_info_here[1]
+                # route_time = route_info_here[2]
+                # print('La ruta:', layer_txt, ' tiene una distancia de ', route_distance, ' y un tiempo de ', route_time)
+                self.Folium.add_route_to_map(coordinates, node_color, layer_txt, route_layer, 2)
 
 
     def get_icon_name(self, node_type):

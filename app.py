@@ -1,5 +1,6 @@
 # app.py
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
+import json
 
 import main
 
@@ -21,8 +22,17 @@ def vehiculos():
 def mapa():
     return render_template('map.html')
 
+@app.route('/graph')
+def graph():
+    return render_template('graph.html')
+
+@app.route('/graph/data')
+def graph_data():
+    return jsonify(json.loads(result_graph_json))
+
+
 if __name__ == '__main__':
-    nodes_df, fleet_df, result_df = main.main()
+    nodes_df, fleet_df, result_df, result_graph_json = main.main()
 
     #app.run(debug=True)
     app.run()

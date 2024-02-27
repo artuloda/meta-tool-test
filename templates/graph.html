@@ -1,0 +1,16 @@
+<!-- templates/graph.html -->
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Bienvenido a la página Graph with NetworkX</h1>
+    <div id="mynetwork"></div>
+    <script type="text/javascript">
+        fetch('/graph/data')
+            .then(response => response.json())
+            .then(data => {
+                var container = document.getElementById('mynetwork');
+                var network = new vis.Network(container, data, {});
+            })
+            .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+        </script>
+{% endblock %}

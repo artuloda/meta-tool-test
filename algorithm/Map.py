@@ -122,8 +122,9 @@ class Map:
                 lat = node_df['Latitude']
                 long = node_df['Longitude']
 
-                latitudes.append(lat)
-                longitudes.append(long)
+                if node_id != 0:
+                    latitudes.append(lat)
+                    longitudes.append(long)
 
                 #print(node_type, icon_name)
                 tooltip_folium = 'Node: ' + str(node_id) + '-' + str(node_name)
@@ -132,12 +133,12 @@ class Map:
 
             coordinates = self.Geo.create_list_of_list_coordinates(latitudes, longitudes)
             if len(coordinates) > 2:
-                # route_info_here = self.Here.calculate_route_HERE(coordinates, 'car', self.parameters.here_API_key)
-                # route_coordinates_here = route_info_here[0]
-                # route_distance = route_info_here[1]
-                # route_time = route_info_here[2]
-                # print('La ruta:', layer_txt, ' tiene una distancia de ', route_distance, ' y un tiempo de ', route_time)
-                self.Folium.add_route_to_map(coordinates, node_color, layer_txt, route_layer, 2)
+                route_info_here = self.Here.calculate_route_HERE(coordinates, 'car', self.parameters.here_API_key)
+                route_coordinates_here = route_info_here[0]
+                route_distance = route_info_here[1]
+                route_time = route_info_here[2]
+                print('La ruta:', layer_txt, ' tiene una distancia de ', route_distance, ' y un tiempo de ', route_time)
+                self.Folium.add_route_to_map(route_coordinates_here, node_color, layer_txt, route_layer, 2)
 
 
     def get_icon_name(self, node_type):
@@ -196,7 +197,7 @@ class Map:
         html = html + self.Folium.add_row_to_HTML_table('Provincia', province, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Código Postal', zip_code, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Tipo Nodo', node_type, None, left_col_color, right_col_color)
-        html = html + self.Folium.add_row_to_HTML_table('Pallets', items, None, left_col_color, right_col_color)
+        html = html + self.Folium.add_row_to_HTML_table('Items', items, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Peso', weight, 'kg.', left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Latitud', lat, None, left_col_color, right_col_color)
         html = html + self.Folium.add_row_to_HTML_table('Longitud', long, None, left_col_color, right_col_color)
@@ -227,7 +228,7 @@ class Map:
         html = html + self.Folium.add_row_to_HTML_table('Código Postal', zip_code, None, left_col_color_2, right_col_color_2)
         html = html + self.Folium.add_row_to_HTML_table('Tipo Nodo', node_type, None, left_col_color_1, right_col_color_1)
         html = html + self.Folium.add_row_to_HTML_table('Pallets', items, None, left_col_color_2, right_col_color_2)
-        html = html + self.Folium.add_row_to_HTML_table('Peso', weight, 'kg.', left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Items', weight, 'kg.', left_col_color_1, right_col_color_1)
         html = html + self.Folium.add_row_to_HTML_table('Latitud', lat, None, left_col_color_2, right_col_color_2)
         html = html + self.Folium.add_row_to_HTML_table('Longitud', long, None, left_col_color_1, right_col_color_1)
         html = html + self.Folium.add_end_HTML_table()

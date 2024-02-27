@@ -14,8 +14,10 @@
     <meta property="og:image" content="URL de la imagen destacada">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
 
+    <!-- Enlaces a las bibliotecas NetworkX -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
     <title>Tu Aplicación</title>
 </head>
 <body>
@@ -29,6 +31,7 @@
                 <li><a href="{{ url_for('clientes') }}">Clientes</a></li>
                 <li><a href="{{ url_for('vehiculos') }}">Flota</a></li>
                 <li><a href="{{ url_for('mapa') }}">Mapa</a></li>
+                <li><a href="{{ url_for('graph') }}">NetworkX</a></li>
             </ul>
         </nav>
     </header>

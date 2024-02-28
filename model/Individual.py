@@ -1,4 +1,6 @@
+import random
 import numpy as np
+from sklearn.cluster import KMeans
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import fcluster, linkage
 
@@ -15,20 +17,96 @@ class Individual:
 
 
     # Main function to solve the CVRP
-    def solve_cvrp(self):
+    def solve_cvrp(self, option):
 
-        print("Start Creating Initial Solution...")
-        self.initialize_routes_hierarchical_clustering()
-        #self.initialize_routes_nearest_neighbor()
-        print("End Creating Initial Solution...")
+        # print("Start Creating Initial Solution...")
+        self.initialize_routes(option)
+        # print("End Creating Initial Solution...")
 
-        print("Start Improving Each Initial Route...")
+        # print("Start Improving Each Initial Route...")
         self.improve_single_route()
-        print("End Improving Each Initial Route. Current Fitness:", self.fitness)
+        # print("End Improving Each Initial Route. Current Fitness:", self.fitness)
 
-        print("Start Improving Routes...")
+        # print("Start Improving Routes...")
         self.improve_routes()
-        print("End Improving Routes. Current Fitness:", self.fitness)
+        # print("End Improving Routes. Current Fitness:", self.fitness)
+
+
+    def initialize_routes(self, option):
+        """
+        Generate an initial feasible solution for the Vehicle Routing Problem using different techniques
+        """
+
+        if option == 1:
+            routes = self.initialize_routes_hierarchical_clustering()
+        elif option == 2:
+            routes = self.initialize_routes_compact_kmeans()
+        elif option == 3: 
+            routes = self.initial_routes_compact()
+        elif option == 4: 
+            routes = self.initialize_routes_nearest_neighbor()
+        else:
+            routes = self.initialize_routes_heuristic()
+
+        routes = self.initialize_routes_heuristic()
+        # Create Routes Objects
+        print(routes)
+        self.create_routes_object(routes)
+
+
+    def initialize_routes_heuristic(self):
+        """
+        Generate an initial feasible solution for the CVRP using a heuristic that
+        selects a random unvisited node and assigns it to a vehicle's route based on
+        certain conditions like capacity and compactness.
+        """
+        max_nodes=45
+        candidates_percentage=5
+        # Assuming self.instance.distance_matrix is a 2D numpy array
+        num_nodes = len(self.instance.nodes_df)
+        node_candidates = {}
+        
+        # 1. Calculate node candidates based on candidates_percentage      
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
+
+        for node in self.instance.nodes_df.itertuples():
+            if node.Node_Type != 'Depot':
+                # Calculate the distances from this node to all others
+                distances = self.instance.distance_matrix[node.Index]
+                # Get a sorted list of nodes based on their distance to the current node
+                sorted_nodes = np.argsort(distances)
+                # Take a certain percentage as candidates
+                num_candidates = int(len(sorted_nodes) * (candidates_percentage / 100))
+                node_candidates[node.Id] = sorted_nodes[:num_candidates].tolist()
+
+        # 2. Solve problem
+        # Assign nodes to vehicles
+        while unvisited_nodes:
+            for vehicle in self.instance.fleet_df.itertuples():
+                if not unvisited_nodes:
+                    break
+
+                # Choose a random node to start with
+                current_node = random.choice(list(unvisited_nodes))
+                unvisited_nodes.remove(current_node)
+
+                # Add node to the route if the vehicle's capacity allows
+                if vehicle_loads[vehicle.Id] + self.instance.nodes_df.at[current_node, 'Items'] <= vehicle.Capacity:
+                    routes[vehicle.Id].append(current_node)
+                    vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[current_node, 'Items']
+
+                    # Select the next node based on the candidates
+                    if node_candidates[current_node]:
+                        distances_to_route = [self.instance.distance_matrix[current_node, candidate] for candidate in node_candidates[current_node] if candidate in unvisited_nodes]
+                        if distances_to_route:
+                            next_node = node_candidates[current_node][np.argmin(distances_to_route)]
+                            if next_node in unvisited_nodes:
+                                routes[vehicle.Id].append(next_node)
+                                vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[next_node, 'Items']
+                                unvisited_nodes.remove(next_node)
+        return routes
 
 
     def initialize_routes_hierarchical_clustering(self):
@@ -85,71 +163,144 @@ class Individual:
         # Convert route indices to client IDs
         for vehicle_id in routes:
             routes[vehicle_id] = [self.instance.nodes_df.at[idx, 'Id'] for idx in routes[vehicle_id]]
+        return routes
+    
 
-        # Create Routes Objects
-        print(routes)
-        self.create_routes_object(routes)
+    def initialize_routes_compact_kmeans(self):
+        """
+        Generate an initial feasible solution for the Vehicle Routing Problem using
+        the K-Means clustering to create compact routes.
+        """
+        # Remove the depot node from the list of nodes to be clustered
+        client_nodes = self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']
 
+        # Extract the location coordinates of the clients
+        coordinates = client_nodes[['Latitude', 'Longitude']].values
+
+        # Perform K-Means clustering to create compact clusters
+        kmeans = KMeans(n_clusters=len(self.instance.fleet_df), random_state=0).fit(coordinates)
+        labels = kmeans.labels_
+
+        # Initialize routes for each vehicle
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_capacities = {vehicle.Id: vehicle.Capacity for vehicle in self.instance.fleet_df.itertuples()}
+
+        # Assign nodes to the nearest vehicle based on the clusters, respecting vehicle capacities
+        for label, node in zip(labels, client_nodes.itertuples()):
+            vehicle_id = self.instance.fleet_df.iloc[label]['Id']
+            if vehicle_loads[vehicle_id] + node.Items <= vehicle_capacities[vehicle_id]:
+                routes[vehicle_id].append(node.Id)
+                vehicle_loads[vehicle_id] += node.Items
+            else:
+                # Find the closest vehicle that can take this node without exceeding capacity
+                distances_to_vehicles = kmeans.transform([[node.Latitude, node.Longitude]])
+                for idx in np.argsort(distances_to_vehicles[0]):
+                    alt_vehicle_id = self.instance.fleet_df.iloc[idx]['Id']
+                    if vehicle_loads[alt_vehicle_id] + node.Items <= vehicle_capacities[alt_vehicle_id]:
+                        routes[alt_vehicle_id].append(node.Id)
+                        vehicle_loads[alt_vehicle_id] += node.Items
+                        break
+        return routes
+    
+    ##################################################
 
     def initialize_routes_nearest_neighbor(self):
         """
-        Generate an initial feasible solution for the Vehicle Routing Problem using
-        the Nearest Neighbor heuristic.
+        Generate an initial feasible solution for the CVRP using the Nearest Neighbor heuristic.
         """
-        
-        # Initialize a dictionary to hold the routes for each vehicle
-        routes = {}
-        for vehicle in self.instance.fleet_df.itertuples():
-            routes[vehicle.Id] = []
-        
-        # Set of all nodes that have not been visited, excluding the depot
-        # Assuming the depot's 'Id' is known and is the first in nodes_df
-        depot_id = self.instance.nodes_df.iloc[0]['Id']
-        unvisited_nodes = set(self.instance.nodes_df['Id']) - {depot_id}
+        # Initialize clusters and vehicle loads and capacities using vehicle IDs
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_capacities = {vehicle.Id: vehicle.Capacity for vehicle in self.instance.fleet_df.itertuples()}
+        depot_id = self.instance.nodes_df[self.instance.nodes_df['Name'] == 'Depot']['Id'].values[0]
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
         
         # Iterate over each vehicle to create a route
         for vehicle in self.instance.fleet_df.itertuples():
-            if unvisited_nodes:
-                # Start with a random node from the unvisited set
-                current_node = unvisited_nodes.pop()
-                route = [current_node]
-                capacity_remaining = vehicle.Capacity  # Initialize vehicle's remaining capacity
+            if not unvisited_nodes:
+                break  # Break the loop if there are no nodes left to visit
+
+            # Start with the nearest node from the depot
+            current_node = depot_id
+            while unvisited_nodes and vehicle_loads[vehicle.Id] < vehicle.Capacity:
+                nearest_next, min_dist = None, float('inf')
+                for next_node in unvisited_nodes:
+                    dist = self.instance.distance_matrix[current_node, next_node]
+                    if dist < min_dist:
+                        min_dist, nearest_next = dist, next_node
                 
-                # Continue creating the route until there are no unvisited nodes or capacity is full
-                while unvisited_nodes and capacity_remaining > 0:
-                    last_node = route[-1]
-                    nearest_next = None
-                    min_dist = float('inf')
-                    
-                    # Find the nearest unvisited node
-                    for next_node in unvisited_nodes:
-                        dist = self.instance.distance_matrix[last_node, next_node]
-                        if dist < min_dist:
-                            min_dist = dist
-                            nearest_next = next_node
-                    
-                    # Check if the nearest node can be added to the route considering the remaining capacity
-                    if nearest_next:
-                        next_node_items = self.instance.nodes_df[self.instance.nodes_df['Id'] == nearest_next]['Items'].values[0]
-                        if next_node_items <= capacity_remaining:
-                            unvisited_nodes.remove(nearest_next)  # Mark the node as visited
-                            route.append(nearest_next)  # Add node to the route
-                            capacity_remaining -= next_node_items  # Update capacity
-                        else:
-                            break  # Break if no more nodes can be added to the route
-                    else:
-                        break  # If no nearest node was found, break the loop
-                    
-                # Assign the created route to the vehicle
-                routes[vehicle.Id] = route
-                # Break out of the loop if there are no more unvisited nodes
-                if not unvisited_nodes:
-                    break
+                if nearest_next is None:
+                    break  # Break the loop if no nearest node was found
 
-        # Once all routes are generated, create Routes Objects
-        print(routes)
-        self.create_routes_object(routes)
+                next_node_items = self.instance.nodes_df.at[nearest_next, 'Items']
+                if vehicle_loads[vehicle.Id] + next_node_items <= vehicle.Capacity:
+                    routes[vehicle.Id].append(nearest_next)
+                    vehicle_loads[vehicle.Id] += next_node_items
+                    unvisited_nodes.remove(nearest_next)
+                    current_node = nearest_next
+                else:
+                    break  # Break the loop if the node cannot be added due to capacity constraints
 
+        # Check if all nodes have been assigned
+        if unvisited_nodes:
+            print(f"Warning: Not all nodes were assigned to a route. Unassigned nodes: {unvisited_nodes}")
+            # Optionally, handle the unassigned nodes here
+        return routes
+    
+
+    def initial_routes_compact(self):
+        """
+        Create initial routes with the objective of making them as compact as possible.
+        """
+        # Set of all nodes that have not been visited, excluding the depot
+        depot_id = self.instance.nodes_df.iloc[0]['Id']
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot'].index)
+        
+        # Initialize routes
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        
+        # Define a maximum distance threshold for compactness
+        max_distance_threshold = 500.0  # Example threshold value, adjust as needed
+        
+        # Assign nodes to vehicles
+        for vehicle in self.instance.fleet_df.itertuples():
+            while unvisited_nodes and vehicle_loads[vehicle.Id] < vehicle.Capacity:
+                if not routes[vehicle.Id]:  # If route is empty, start from depot
+                    nearest_next, dist = self.find_nearest_neighbor(depot_id, unvisited_nodes)
+                else:  # Otherwise, continue from last node in route
+                    last_node = routes[vehicle.Id][-1]
+                    nearest_next, dist = self.find_nearest_neighbor(last_node, unvisited_nodes)
+                    
+                # Check if the nearest node can be added without exceeding the capacity and distance threshold
+                if nearest_next and vehicle_loads[vehicle.Id] + self.instance.nodes_df.at[nearest_next, 'Items'] <= vehicle.Capacity and dist <= max_distance_threshold:
+                    routes[vehicle.Id].append(nearest_next)
+                    vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[nearest_next, 'Items']
+                    unvisited_nodes.remove(nearest_next)
+                else:
+                    break  # If no suitable node is found, move to the next vehicle
+
+        # Check if all nodes have been assigned
+        if unvisited_nodes:
+            print(f"Warning: Not all nodes were assigned to a route. Unassigned nodes: {unvisited_nodes}")
+            # Handle unassigned nodes as needed
+        return routes
+    
+
+    def find_nearest_neighbor(self, last_node, unvisited_clients):
+        """
+        Find the nearest neighbor to a given node from a set of unvisited clients.
+        """
+        nearest_next = None
+        min_dist = float('inf')
+        for client in unvisited_clients:
+            dist = self.instance.distance_matrix[last_node][client]
+            if dist < min_dist:
+                min_dist = dist
+                nearest_next = client
+        return nearest_next, min_dist
+    
 
     def create_routes_object(self, routes):
         """
@@ -178,26 +329,27 @@ class Individual:
         """
         Apply routes improvements to each route created in initial solution
         """
-        print("Executing 2-opt, 3-opt...")
+        # print("Executing 2-opt, 3-opt...")
         solution_fitness = 0
         for route in self.routes:
-            print('Mejorando Ruta:', route.id, '... FITNESS:', route.fitness)
+            # print('Mejorando Ruta:', route.id, '... FITNESS:', route.fitness)
 
             route.two_opt() # Apply 2-opt to each route
-            print('\tFitness tras 2-opt:', route.id, '... FITNESS:', route.fitness)
+            # print('\tFitness tras 2-opt:', route.id, '... FITNESS:', route.fitness)
 
             route.three_opt_first_improvement() # Apply 3-opt first improvent to each route
-            print('\tFitness tras 3-opt first improvement:', route.id, '... FITNESS:', route.fitness)
+            # print('\tFitness tras 3-opt first improvement:', route.id, '... FITNESS:', route.fitness)
 
             route.three_opt() # Apply 3-opt to each route
-            print('\tFitness tras 3-opt:', route.id, '... FITNESS:', route.fitness)
+            # print('\tFitness tras 3-opt:', route.id, '... FITNESS:', route.fitness)
 
             route.lin_kernighan(max_iter=10000, max_time_seconds=60) # Apply lin_kernighan to each route
-            print('\tFitness tras lin_kernighan:', route.id, '... FITNESS:', route.fitness)
+            # print('\tFitness tras lin_kernighan:', route.id, '... FITNESS:', route.fitness)
 
             solution_fitness = solution_fitness + route.fitness
-            print('----------------------------------------------------------------')
+            # print('----------------------------------------------------------------')
         self.fitness = solution_fitness
+
 
     def improve_routes(self):
         i = 0

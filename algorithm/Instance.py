@@ -51,7 +51,7 @@ class Instance:
                 phone = ''
             region_id = int(node['CODAUTO'])
 
-            # if node_counter > 200: # COMMENT
+            # if node_counter > 100: # COMMENT
             #     break
 
             if not region_id in not_included_regions:

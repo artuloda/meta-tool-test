@@ -103,7 +103,9 @@ class Map:
         index_color = 0
         for route_df in routes_df_list:
             vehicle_name = route_df['Vehicle'].values[0]
-            layer_txt = 'Ruta ' + str(vehicle_name)
+            route_load = route_df['Items'].sum()
+            total_nodes = len(route_df) - 2
+            layer_txt = 'Ruta ' + str(vehicle_name) + ' - Carga: ' + str(route_load) + ' Paradas: ' + str(total_nodes)
             route_layer =  self.Folium.create_feature_group_folium(self.map_object, layer_color, layer_txt, initial_show, dynamic)
             node_color, index_color = self.Folium.get_node_color(index_color, self.colors_high_contrast)
             latitudes = list()

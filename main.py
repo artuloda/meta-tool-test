@@ -1,5 +1,4 @@
 import algorithm
-import numpy as np
 import time
 
 
@@ -21,9 +20,12 @@ if __name__ == '__main__':
     solution.save_solution()    
     print(solution.best_solution)
     print('Best FITNESS:', solution.fitness)
+
+    validation = algorithm.Validation(parameters, instance, solution)
+    validation.validate()
     
-    map_object = algorithm.Map(parameters, instance, solution)
-    map_object.draw_map()
+    # map_object = algorithm.Map(parameters, instance, solution)
+    # map_object.draw_map()
 
     end_time = time.time()
     print("Total Execution Time: " + str(round(end_time - start_time, 2)) + "s")
@@ -47,6 +49,9 @@ def main():
     solution.save_solution()    
     print(solution.best_solution)
     print('Best FITNESS:', solution.fitness)
+
+    validation = algorithm.Validation(parameters, instance, solution)
+    validation.validate()
     
     # map_object = algorithm.Map(parameters, instance, solution)
     # map_object.draw_map()

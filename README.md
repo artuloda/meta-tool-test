@@ -16,8 +16,6 @@ To set up the Meta-Heuristic Optimization Tool, clone the repository and install
 git clone https://github.com/artuloda/meta-tool-test.git
 cd meta-tool-test
 pip install -r requirements.txt
-Flask Application
-The tool includes a Flask web application for interactive visualization and management of routing solutions.
 ```
 
 ## Flask Application

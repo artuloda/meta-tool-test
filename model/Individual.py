@@ -165,6 +165,7 @@ class Individual:
         max_nodes = 45
         candidates_percentage = 5
         init_candidates = 3
+        nodes_to_assing = 10
         routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
         vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
         vehicle_capacities = {vehicle.Id: vehicle.Capacity for vehicle in self.instance.fleet_df.itertuples()}
@@ -216,7 +217,7 @@ class Individual:
 
         # Solve problem by assigning nodes to vehicles
         #while unvisited_nodes:
-        for i in range(10):
+        for i in range(nodes_to_assing):
             for vehicle, candidates in routes_candidates.items():
                 route_nodes = routes[vehicle]
                 # print('Ruta: ', vehicle, ' Nodos:', route_nodes,' Candidatos:', candidates)
@@ -264,10 +265,11 @@ class Individual:
             for vehicle in closest_routes_list:
                 route_nodes = routes[vehicle]
                 route_total_nodes = len(route_nodes)
+                route_load = vehicle_loads[vehicle]
                 vehicle_capacicty = vehicle_capacities[vehicle]
 
                 # We add the node
-                if (items <= vehicle_capacicty) and (route_total_nodes + 1 <= max_nodes):
+                if (route_load + items) <= vehicle_capacicty and (route_total_nodes + 1 <= max_nodes):
                     routes[vehicle].append(node)
                     vehicle_loads[vehicle] += items
                     unvisited_nodes.remove(node)

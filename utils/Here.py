@@ -40,7 +40,7 @@ class Here:
         Devuelve:
         Las coordenadas de la ruta junto a su distancia en KM y su tiempo en horas.
         """
-        url = "https://router.hereapi.com/v8/routes?&transportMode=" + str(vehicle)
+        url = "https://router.hereapi.com/v8/routes?"
         origin_point = coordinates[0]
         origin = "&origin=" + str(origin_point[0]) + "," + str(origin_point[1])  # Punto origen
         destination_point = coordinates[len(coordinates) - 1]
@@ -50,7 +50,9 @@ class Here:
             point = coordinates[pos]
             via = via + "&via=" + str(point[0]) + "," + str(point[1])
 
-        url_query = url + origin + destination + via + "!passThrough=true&return=polyline,summary" + "&apikey=" + here_API_key
+        transport_mode = "&transportMode=" + str(vehicle)
+        # url_query = url + origin + destination + via + "!passThrough=true&return=polyline,summary" + "&apikey=" + here_API_key
+        url_query = url + origin + transport_mode + destination + via + "&return=polyline,summary" + "&apikey=" + here_API_key
         data_route_response = self.request_url_HERE(url_query)
 
         route_info = list()

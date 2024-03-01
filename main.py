@@ -24,8 +24,8 @@ if __name__ == '__main__':
     validation = algorithm.Validation(parameters, instance, solution)
     validation.validate()
     
-    map_object = algorithm.Map(parameters, instance, solution)
-    map_object.draw_map()
+    # map_object = algorithm.Map(parameters, instance, solution)
+    # map_object.draw_map()
 
     end_time = time.time()
     print("Total Execution Time: " + str(round(end_time - start_time, 2)) + "s")

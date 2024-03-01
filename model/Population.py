@@ -15,7 +15,7 @@ class Population:
         """
         # Creation
         for iteration in range(self.parameters.TAM_POPULATION):
-            print('Start Iteration:', iteration, '...')
+            # print('Start Iteration:', iteration, '...')
             individual = Individual(self.parameters, self.instance)
 
             # if iteration % 2 == 0:
@@ -23,7 +23,7 @@ class Population:
                 option = 1
             else:
                 option = 2
-                
+            option = 3 
             individual.solve_cvrp(option)
             self.individuals.append(individual)
             self.individuals_fitness.append(individual.fitness)

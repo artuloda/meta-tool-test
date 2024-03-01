@@ -24,9 +24,9 @@ class Solution:
 
     
     def save_solution(self):
-
+        """
+        """
         self.create_result_dataframe()
-
         self.create_graph()
 
 

@@ -18,10 +18,12 @@ class Population:
             print('Start Iteration:', iteration, '...')
             individual = Individual(self.parameters, self.instance)
 
-            if iteration % 2 == 0:
+            # if iteration % 2 == 0:
+            if iteration == 1:
                 option = 1
             else:
                 option = 2
+                
             individual.solve_cvrp(option)
             self.individuals.append(individual)
             self.individuals_fitness.append(individual.fitness)

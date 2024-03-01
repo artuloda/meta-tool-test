@@ -97,7 +97,7 @@ class Map:
         """
         """
         routes_df_list = self.IO.cluster_dataframe_by_condition(self.solution.result_df, 'Vehicle')
-        layer_color = '#931314' # '#931314' Saffron Red
+        layer_color = '#25383C' # '#25383C'	DarkSlateGray or DarkSlateGrey (W3C)
         initial_show = False
         dynamic = False
         index_color = 0
@@ -216,7 +216,7 @@ class Map:
     def add_route_html_node(self, nodes_layer, node_color, tooltip_folium, node_id, node_name, address, location, province, zip_code, node_type, items, weight, lat, long, stops_counter):
         """
         """
-        left_col_color_1 = '#2C3539' # Even row left color
+        left_col_color_1 = '#36454F' #'#2C3539' # Even row left color
         right_col_color_1 = '#FBFBF9' # Even row right color
         left_col_color_2 = '#36454F' # Odd row left color
         right_col_color_2 = '#FAF5EF' # Odd row right color
@@ -229,8 +229,8 @@ class Map:
         html = html + self.Folium.add_row_to_HTML_table('Provincia', province, None, left_col_color_1, right_col_color_1)
         html = html + self.Folium.add_row_to_HTML_table('Código Postal', zip_code, None, left_col_color_2, right_col_color_2)
         html = html + self.Folium.add_row_to_HTML_table('Tipo Nodo', node_type, None, left_col_color_1, right_col_color_1)
-        html = html + self.Folium.add_row_to_HTML_table('Pallets', items, None, left_col_color_2, right_col_color_2)
-        html = html + self.Folium.add_row_to_HTML_table('Items', weight, 'kg.', left_col_color_1, right_col_color_1)
+        html = html + self.Folium.add_row_to_HTML_table('Items', items, None, left_col_color_2, right_col_color_2)
+        html = html + self.Folium.add_row_to_HTML_table('Peso', weight, 'kg.', left_col_color_1, right_col_color_1)
         html = html + self.Folium.add_row_to_HTML_table('Latitud', lat, None, left_col_color_2, right_col_color_2)
         html = html + self.Folium.add_row_to_HTML_table('Longitud', long, None, left_col_color_1, right_col_color_1)
         html = html + self.Folium.add_end_HTML_table()

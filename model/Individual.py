@@ -1,5 +1,7 @@
 import random
 import numpy as np
+from ortools.constraint_solver import routing_enums_pb2
+from ortools.constraint_solver import pywrapcp
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import fcluster, linkage
@@ -42,71 +44,17 @@ class Individual:
         elif option == 2:
             routes = self.initialize_routes_compact_kmeans()
         elif option == 3: 
-            routes = self.initial_routes_compact()
+            routes = self.initialize_routes_heuristic()
         elif option == 4: 
             routes = self.initialize_routes_nearest_neighbor()
+        elif option == 5: 
+            routes = self.initial_routes_compact()
         else:
-            routes = self.initialize_routes_heuristic()
+            routes = self.initialize_routes_or_tools()
 
-        routes = self.initialize_routes_heuristic()
         # Create Routes Objects
-        print(routes)
+        # print(routes)
         self.create_routes_object(routes)
-
-
-    def initialize_routes_heuristic(self):
-        """
-        Generate an initial feasible solution for the CVRP using a heuristic that
-        selects a random unvisited node and assigns it to a vehicle's route based on
-        certain conditions like capacity and compactness.
-        """
-        max_nodes=45
-        candidates_percentage=5
-        # Assuming self.instance.distance_matrix is a 2D numpy array
-        num_nodes = len(self.instance.nodes_df)
-        node_candidates = {}
-        
-        # 1. Calculate node candidates based on candidates_percentage      
-        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
-        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
-        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
-
-        for node in self.instance.nodes_df.itertuples():
-            if node.Node_Type != 'Depot':
-                # Calculate the distances from this node to all others
-                distances = self.instance.distance_matrix[node.Index]
-                # Get a sorted list of nodes based on their distance to the current node
-                sorted_nodes = np.argsort(distances)
-                # Take a certain percentage as candidates
-                num_candidates = int(len(sorted_nodes) * (candidates_percentage / 100))
-                node_candidates[node.Id] = sorted_nodes[:num_candidates].tolist()
-
-        # 2. Solve problem
-        # Assign nodes to vehicles
-        while unvisited_nodes:
-            for vehicle in self.instance.fleet_df.itertuples():
-                if not unvisited_nodes:
-                    break
-
-                # Choose a random node to start with
-                current_node = random.choice(list(unvisited_nodes))
-                unvisited_nodes.remove(current_node)
-
-                # Add node to the route if the vehicle's capacity allows
-                if vehicle_loads[vehicle.Id] + self.instance.nodes_df.at[current_node, 'Items'] <= vehicle.Capacity:
-                    routes[vehicle.Id].append(current_node)
-                    vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[current_node, 'Items']
-
-                    # Select the next node based on the candidates
-                    if node_candidates[current_node]:
-                        distances_to_route = [self.instance.distance_matrix[current_node, candidate] for candidate in node_candidates[current_node] if candidate in unvisited_nodes]
-                        if distances_to_route:
-                            next_node = node_candidates[current_node][np.argmin(distances_to_route)]
-                            if next_node in unvisited_nodes:
-                                routes[vehicle.Id].append(next_node)
-                                vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[next_node, 'Items']
-                                unvisited_nodes.remove(next_node)
-        return routes
 
 
     def initialize_routes_hierarchical_clustering(self):
@@ -178,7 +126,8 @@ class Individual:
         coordinates = client_nodes[['Latitude', 'Longitude']].values
 
         # Perform K-Means clustering to create compact clusters
-        kmeans = KMeans(n_clusters=len(self.instance.fleet_df), random_state=0).fit(coordinates)
+        random_seed = np.random.randint(0, 10000)
+        kmeans = KMeans(n_clusters=len(self.instance.fleet_df), random_state=random_seed).fit(coordinates)
         labels = kmeans.labels_
 
         # Initialize routes for each vehicle
@@ -201,6 +150,69 @@ class Individual:
                         routes[alt_vehicle_id].append(node.Id)
                         vehicle_loads[alt_vehicle_id] += node.Items
                         break
+        return routes
+    
+
+    def initialize_routes_heuristic(self):
+        # 1. Calculate node candidates based on candidates_percentage      
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
+
+        return routes
+
+    def initialize_routes_heuristic2(self):
+        """
+        Generate an initial feasible solution for the CVRP using a heuristic that
+        selects a random unvisited node and assigns it to a vehicle's route based on
+        certain conditions like capacity and compactness.
+        """
+        max_nodes=45
+        candidates_percentage=5
+        # Assuming self.instance.distance_matrix is a 2D numpy array
+        num_nodes = len(self.instance.nodes_df)
+        node_candidates = {}
+        
+        # 1. Calculate node candidates based on candidates_percentage      
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
+
+        for node in self.instance.nodes_df.itertuples():
+            if node.Node_Type != 'Depot':
+                # Calculate the distances from this node to all others
+                distances = self.instance.distance_matrix[node.Index]
+                # Get a sorted list of nodes based on their distance to the current node
+                sorted_nodes = np.argsort(distances)
+                # Take a certain percentage as candidates
+                num_candidates = int(len(sorted_nodes) * (candidates_percentage / 100))
+                node_candidates[node.Id] = sorted_nodes[:num_candidates].tolist()
+
+        # 2. Solve problem
+        # Assign nodes to vehicles
+        while unvisited_nodes:
+            for vehicle in self.instance.fleet_df.itertuples():
+                if not unvisited_nodes:
+                    break
+
+                # Choose a random node to start with
+                current_node = random.choice(list(unvisited_nodes))
+                unvisited_nodes.remove(current_node)
+
+                # Add node to the route if the vehicle's capacity allows
+                if vehicle_loads[vehicle.Id] + self.instance.nodes_df.at[current_node, 'Items'] <= vehicle.Capacity:
+                    routes[vehicle.Id].append(current_node)
+                    vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[current_node, 'Items']
+
+                    # Select the next node based on the candidates
+                    if node_candidates[current_node]:
+                        distances_to_route = [self.instance.distance_matrix[current_node, candidate] for candidate in node_candidates[current_node] if candidate in unvisited_nodes]
+                        if distances_to_route:
+                            next_node = node_candidates[current_node][np.argmin(distances_to_route)]
+                            if next_node in unvisited_nodes:
+                                routes[vehicle.Id].append(next_node)
+                                vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[next_node, 'Items']
+                                unvisited_nodes.remove(next_node)
         return routes
     
     ##################################################
@@ -301,6 +313,79 @@ class Individual:
                 nearest_next = client
         return nearest_next, min_dist
     
+
+    def initialize_routes_or_tools(self):
+        """Solve the CVRP problem Using OR-Tools"""
+        # Instantiate the data problem.
+        data = {}
+        data["distance_matrix"] = self.instance.distance_matrix
+        data["demands"] = self.instance.nodes_df['Items'].tolist()  # Agregar los pesos de los nodos
+        data["vehicle_capacities"] = self.instance.fleet_df['Capacity'].tolist()  # Capacidades de los vehículos
+        data["num_vehicles"] = len(self.instance.fleet_df)
+        data["depot"] = 0
+
+        # Aquí, establece los puntos de inicio y fin de cada vehículo en el depósito.
+        starts = [data["depot"]] * data["num_vehicles"]
+        ends = [data["depot"]] * data["num_vehicles"]
+
+        # Create the routing index manager.
+        manager = pywrapcp.RoutingIndexManager(len(data["distance_matrix"]), data["num_vehicles"], starts, ends)
+
+        # Create Routing Model.
+        routing = pywrapcp.RoutingModel(manager)
+
+        # Create and register a transit callback.
+        def distance_callback(from_index, to_index):
+            """Returns the distance between the two nodes."""
+            # Convert from routing variable Index to distance matrix NodeIndex.
+            from_node = manager.IndexToNode(from_index)
+            to_node = manager.IndexToNode(to_index)
+            return data["distance_matrix"][from_node][to_node]
+
+        transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+
+        # Define cost of each arc.
+        routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+
+        # Add Capacity constraint.
+        def demand_callback(from_index):
+            """Returns the demand of the node."""
+            # Convert from routing variable Index to demands NodeIndex.
+            from_node = manager.IndexToNode(from_index)
+            return data["demands"][from_node]
+
+        demand_callback_index = routing.RegisterUnaryTransitCallback(demand_callback)
+        routing.AddDimensionWithVehicleCapacity(
+            demand_callback_index,
+            0,  # null capacity slack
+            data["vehicle_capacities"],  # vehicle maximum capacities
+            True,  # start cumul to zero
+            "Capacity",
+        )
+
+        # Setting first solution heuristic.
+        search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+        search_parameters.first_solution_strategy = (routing_enums_pb2.FirstSolutionStrategy.AUTOMATIC)
+        search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.AUTOMATIC)
+        search_parameters.time_limit.seconds = 45
+        # search_parameters.time_limit.FromSeconds(1)
+
+        # Solve the problem.
+        solution = routing.SolveWithParameters(search_parameters)
+
+        # Extract solution and save it into routes
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        for vehicle_id in range(data["num_vehicles"]):
+            index = routing.Start(vehicle_id)
+            print('Ruta para el vehículo', vehicle_id + 1)
+            while not routing.IsEnd(index):
+                node_index = manager.IndexToNode(index)
+                if node_index != data["depot"]:
+                    routes[vehicle_id + 1].append(node_index)
+                index = solution.Value(routing.NextVar(index))
+
+        return routes
+        
 
     def create_routes_object(self, routes):
         """

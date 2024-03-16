@@ -22,7 +22,10 @@ class Individual:
 
     # Main function to solve the CVRP
     def solve_cvrp(self, option):
-
+        """
+        Solve the Capacitated Vehicle Routing Problem (CVRP) using different techniques.
+        
+        """
         # print("Start Creating Initial Solution...")
         self.initialize_routes(option)
         # print("End Creating Initial Solution...")

@@ -1,11 +1,12 @@
 from model import Population
-from utils import IO, Graph, Folium
+from utils import IO, Graph, Folium, DataGraph
 
 class Solution:
 
     def __init__(self, parameters, instance):
         self.IO = IO()
         self.Graph = Graph()
+        self.DataGraph = DataGraph()
         self.Folium = Folium()
         self.parameters = parameters
         self.instance = instance
@@ -13,6 +14,7 @@ class Solution:
         self.fitness = None
         self.result_df = None
         self.result_graph_json = None
+        self.result_graph_img_html = None
         self.constructive()
 
 
@@ -25,13 +27,17 @@ class Solution:
     
     def save_solution(self):
         """
+        Save the best solution found in a .csv, create networkx graph and create, graph img  html for visualization with folium.
         """
         self.create_result_dataframe()
         self.create_graph()
-
+        self.create_graph_img_html()
+        
 
     def create_result_dataframe(self):
         """
+        Create a pandas dataframe with the result of the algorithm  
+        and store it in 'result_df' attribute 
         """
         result_routes_list = []
         for route in self.best_solution.routes:
@@ -63,6 +69,7 @@ class Solution:
 
     def create_graph(self):
         """
+        Generate an Graph object from the data contained into 'result_df'.
         """
         colors_dataframe = self.IO.read_csv(file_path=self.parameters.static_map_path + 'HEXADECIMAL_COLORS.csv', separator=';', encoding='utf-8', decimal=',')
         colors = colors_dataframe[colors_dataframe['ContrastChk'] == 1]['HexCode'].values.tolist()
@@ -92,6 +99,20 @@ class Solution:
         self.Graph.create_result_json_graph()   
         self.result_graph_json = self.Graph.graph_json
 
+
+    def create_graph_img_html(self):
+        """
+        Creates an image with the results
+        """
+        routes_ids = list()
+        routes_items = list()
+        routes_df_list = self.IO.cluster_dataframe_by_condition(self.result_df, 'Vehicle')
+        for route_df in routes_df_list:
+            vehicle_name = route_df['Vehicle'].values[0]
+            route_items = route_df['Items'].sum()
+            routes_ids.append(vehicle_name)
+            routes_items.append(route_items)
+        self.result_graph_img_html = self.DataGraph.create_matplotlib_graph(routes_ids, routes_items, max_width_pop_up=500)
 
     def __str__(self) -> str:
         print('Solution:', self.best_solution)

@@ -21,7 +21,6 @@ class Validation:
         total_nodes = len(self.instance.nodes_df)
         total_vehicles = len(self.instance.fleet_df)
 
-
         # Output Data
         total_result_items = self.solution.result_df['Items'].sum()
         total_result_weight = self.solution.result_df['Weight'].sum()

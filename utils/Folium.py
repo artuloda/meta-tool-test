@@ -115,7 +115,7 @@ class Folium:
         return icon
     
     
-    def create_pop_up(self, html):
+    def create_pop_up(self, html, max_width):
         """
         Creates a Folium Pop Up.
 
@@ -125,7 +125,7 @@ class Folium:
         Return:
         pop_up -- Folium Pop Up
         """
-        pop_up = folium.Popup(folium.Html(html, script=True), max_width=500)
+        pop_up = folium.Popup(folium.Html(html, script=True), max_width=max_width)
         return pop_up
     
 
@@ -176,6 +176,16 @@ class Folium:
         html = """</tbody></table></center>
         <center><strong>hosted by <span style="font-family: 'system-ui'; font-size: 30px; color:#36454F">{}</span>""".format('Route66') + """</strong></center>
         </html>"""
+        return html
+    
+    
+    def add_end_HTML_table_with_graph(self, graph_img_html):
+        """
+        Crea el final de una tabla html con formato y un grafico 
+        """
+        html = """</tbody></table></center>"""
+        html = html + graph_img_html # Al terminar la tabla, meto la imagne con el grafico generada
+        html = html + """<center><strong>hosted by <span style="font-family: 'system-ui'; font-size: 30px; color:#36454F">{}</span>""".format('Route66') + """</strong></center></html>"""
         return html
 
 

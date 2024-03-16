@@ -59,4 +59,4 @@ class Graph:
         labels = {node: node for node in self.graph.nodes()}
 
         nx.draw(self.graph, pos, node_color=node_colors, labels=labels, with_labels=True, node_size=50, font_size=8)
-        plt.show()
+        # plt.show()

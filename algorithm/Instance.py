@@ -77,6 +77,9 @@ class Instance:
 
     # Function to create a distance matrix using geodesic distance
     def create_distance_matrix(self):
+        """
+        Creates the distance matrix between all pairs of nodes.
+        """
         print("Creating distance matrix...")
         coordinates = self.nodes_df[['Latitude', 'Longitude']].values
         def dist_func(u, v):

@@ -2,7 +2,6 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-    <h1>Bienvenido a la página Mapa</h1>
-    <p>Aquí puedes agregar tu texto o contenido principal.</p>
+    <h1>Mapa Resultado de la solución</h1>
     <iframe src="{{ url_for('static', filename='map/result_map.html') }}" width="100%" height="700px"></iframe>
 {% endblock %}

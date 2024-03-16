@@ -74,7 +74,7 @@ Navigate to http://localhost:5000/ in your web browser to access the application
 Distributed under the MIT License. See LICENSE for more information.
 
 ## Contact
-Should you have any inquiries or require further information, please contact Arturo López-Damas Oliveres via - @artuloda
+Should you have any inquiries or require further information, please contact Arturo López-Damas Oliveres via - [@artuloda](https://github.com/artuloda)
 
 Explore the project on GitHub: [Meta-Heuristic Optimization Framework for CVRP](https://github.com/artuloda/meta-tool-test)
 

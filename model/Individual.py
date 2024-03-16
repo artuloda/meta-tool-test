@@ -51,8 +51,10 @@ class Individual:
         elif option == 3: 
             routes = self.initialize_routes_heuristic()
         elif option == 4: 
-            routes = self.initialize_routes_nearest_neighbor()
+            routes = self.initialize_routes_heuristic_min_fleet()
         elif option == 5: 
+            routes = self.initialize_routes_nearest_neighbor()
+        elif option == 6: 
             routes = self.initial_routes_compact()
         else:
             routes = self.initialize_routes_or_tools()
@@ -157,6 +159,147 @@ class Individual:
                         break
         return routes
     
+
+    def initialize_routes_heuristic_min_fleet_test(self):
+        """
+        Generate an initial feasible solution for the CVRP using a heuristic that
+        selects a random unvisited node and assigns it to a vehicle's route based on
+        certain conditions like capacity and compactness.
+        """
+        # Initialize configurations
+        max_nodes = 45
+        candidates_percentage = 5
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        routes_candidates = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        routes_centroids = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_capacities = {vehicle.Id: vehicle.Capacity for vehicle in self.instance.fleet_df.itertuples()}
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
+
+        # Calculate node candidates based on candidates_percentage
+        node_candidates = {}
+        for node in self.instance.nodes_df.itertuples():
+            if node.Node_Type != 'Depot':
+                distances = self.instance.distance_matrix[node.Index]
+                sorted_nodes = np.argsort(distances)
+                num_candidates = int(len(sorted_nodes) * (candidates_percentage / 100))
+                node_candidates[node.Id] = sorted_nodes[:num_candidates].tolist()
+
+        # Initialize Vehicles with a random set of nodes
+        previous_node = random.choice(list(unvisited_nodes))
+        for vehicle in self.instance.fleet_df.itertuples():
+            if not unvisited_nodes:
+                break
+            
+            distances_to_previous_node = self.instance.distance_matrix[previous_node]
+            adjusted_distances = np.where(np.isin(range(len(distances_to_previous_node)), list(unvisited_nodes), invert=True), 0, distances_to_previous_node)
+            current_node = np.argmax(adjusted_distances)
+            # current_node = random.choice(list(unvisited_nodes))
+
+            # print("Creando ruta para el vehiculo: ", vehicle.Id)
+            # If not exceed capacity and max nodesin route, we add it
+            if vehicle_loads[vehicle.Id] + self.instance.nodes_df.at[current_node, 'Items'] <= vehicle.Capacity and len(routes[vehicle.Id]) <= max_nodes:
+                routes[vehicle.Id].append(current_node)
+                vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[current_node, 'Items']
+                unvisited_nodes.remove(current_node)
+                routes_candidates[vehicle.Id].extend(node_candidates[current_node])
+
+                # Add Candidates
+                stop = False
+                while not stop:                   
+                    min_distance = 1_000_000
+                    best_candidate = None
+                    best_candidate_items = None
+                    previous_node = current_node
+                    for candidate in routes_candidates[vehicle.Id]:
+                        candidate_items = self.instance.nodes_df.at[candidate, 'Items']
+                        if candidate in unvisited_nodes and vehicle_loads[vehicle.Id] + candidate_items <= vehicle_capacities[vehicle.Id]:
+                            distance = self.instance.distance_matrix[candidate, previous_node]
+                            if distance < min_distance:
+                                min_distance = distance
+                                best_candidate = candidate
+                                best_candidate_items = candidate_items
+
+                    if best_candidate is not None:
+                        previous_node = best_candidate
+                        routes[vehicle.Id].append(best_candidate)
+                        vehicle_loads[vehicle.Id] += best_candidate_items
+                        unvisited_nodes.remove(best_candidate)
+                        routes_candidates[vehicle.Id].remove(best_candidate)
+                        routes_candidates[vehicle.Id].extend(node_candidates[best_candidate])
+                    else:
+                        stop=True
+
+        #print(node_candidates)
+        return routes 
+    
+
+    def initialize_routes_heuristic_min_fleet(self):
+        """
+        Generate an initial feasible solution for the CVRP using a heuristic that
+        selects a random unvisited node and assigns it to a vehicle's route based on
+        certain conditions like capacity and compactness.
+        """
+        # Initialize configurations
+        max_nodes = 45
+        candidates_percentage = 5
+        routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        routes_candidates = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        routes_centroids = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_loads = {vehicle.Id: 0 for vehicle in self.instance.fleet_df.itertuples()}
+        vehicle_capacities = {vehicle.Id: vehicle.Capacity for vehicle in self.instance.fleet_df.itertuples()}
+        unvisited_nodes = set(self.instance.nodes_df[self.instance.nodes_df['Node_Type'] != 'Depot']['Id'])
+
+        # Calculate node candidates based on candidates_percentage
+        node_candidates = {}
+        for node in self.instance.nodes_df.itertuples():
+            if node.Node_Type != 'Depot':
+                distances = self.instance.distance_matrix[node.Index]
+                sorted_nodes = np.argsort(distances)
+                num_candidates = int(len(sorted_nodes) * (candidates_percentage / 100))
+                node_candidates[node.Id] = sorted_nodes[:num_candidates].tolist()
+
+        # Initialize Vehicles with a random set of nodes
+        for vehicle in self.instance.fleet_df.itertuples():
+            if not unvisited_nodes:
+                break
+            current_node = random.choice(list(unvisited_nodes))
+            # print("Creando ruta para el vehiculo: ", vehicle.Id)
+            # If not exceed capacity and max nodesin route, we add it
+            if vehicle_loads[vehicle.Id] + self.instance.nodes_df.at[current_node, 'Items'] <= vehicle.Capacity and len(routes[vehicle.Id]) <= max_nodes:
+                routes[vehicle.Id].append(current_node)
+                vehicle_loads[vehicle.Id] += self.instance.nodes_df.at[current_node, 'Items']
+                unvisited_nodes.remove(current_node)
+                routes_candidates[vehicle.Id].extend(node_candidates[current_node])
+
+                # Add Candidates
+                stop = False
+                while not stop:                   
+                    min_distance = 1_000_000
+                    best_candidate = None
+                    best_candidate_items = None
+                    previous_node = current_node
+                    for candidate in routes_candidates[vehicle.Id]:
+                        candidate_items = self.instance.nodes_df.at[candidate, 'Items']
+                        if candidate in unvisited_nodes and vehicle_loads[vehicle.Id] + candidate_items <= vehicle_capacities[vehicle.Id]:
+                            distance = self.instance.distance_matrix[candidate, previous_node]
+                            if distance < min_distance:
+                                min_distance = distance
+                                best_candidate = candidate
+                                best_candidate_items = candidate_items
+
+                    if best_candidate is not None:
+                        previous_node = best_candidate
+                        routes[vehicle.Id].append(best_candidate)
+                        vehicle_loads[vehicle.Id] += best_candidate_items
+                        unvisited_nodes.remove(best_candidate)
+                        routes_candidates[vehicle.Id].remove(best_candidate)
+                        routes_candidates[vehicle.Id].extend(node_candidates[best_candidate])
+                    else:
+                        stop=True
+
+        #print(node_candidates)
+        return routes             
 
     def initialize_routes_heuristic(self):
         """

@@ -18,6 +18,7 @@ class Map:
         """
         Initialize Data for Map Class
         """
+        print("Creating Map Data...")
         self.logo_img_file = self.parameters.static_map_path + 'logo_white.png'
         self.colors_dataframe = self.IO.read_csv(file_path=self.parameters.static_map_path + 'HEXADECIMAL_COLORS.csv', separator=';', encoding='utf-8', decimal=',') # Dataframe con los colores
         self.colors = self.Folium.get_input_colors(self.colors_dataframe, 0) # Lista desordenada de colores en hexadecimal
@@ -32,6 +33,7 @@ class Map:
         """
         Main Method: Creates HTML MAP USING FOLIUM
         """
+        print("Creating Map...")
         self.draw_zip_codes()
         self.draw_depot()
         self.draw_nodes()

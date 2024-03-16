@@ -1,16 +1,16 @@
-# Meta-Heuristic Optimization Tool for CVRP
-Meta-Heuristic Optimization Tool is a comprehensive Python library tailored for solving complex Capacitated Vehicle Routing Problems (CVRP). It leverages various optimization techniques and heuristics to generate efficient routing plans that adhere to vehicle capacity constraints and customer demands.
+# Meta-Heuristic Optimization Framework for CVRP
+The Meta-Heuristic Optimization Framework is an advanced, Python-based software library designed to address the complexities of the Capacitated Vehicle Routing Problem (CVRP). By integrating state-of-the-art optimization strategies and heuristic algorithms, this tool facilitates the development of optimized routing solutions that meticulously observe vehicle capacity limitations and customer requirements.
 
-## Features
-- Custom Heuristics: Implements Nearest Neighbor and Hierarchical Clustering to generate initial feasible solutions.
-- Optimization Techniques: Utilizes 2-opt, 3-opt, and Lin-Kernighan heuristics for route improvement.
-- Flask Web Application: Comes with an integrated Flask app for visualizing routes and node distributions on maps.
-- Scalability: Engineered to handle large datasets with thousands of nodes efficiently.
-- Data Visualization: Supports various libraries like Matplotlib, Seaborn, and Plotly for insightful data analytics.
-- Geographical Tools: Incorporates Folium for interactive map visuals, along with GeoPy and Shapely for geospatial analysis.
+## Key Features
+- Sophisticated Heuristics: Incorporates cutting-edge algorithms such as Nearest Neighbor and Hierarchical Clustering to construct initial, viable solutions.
+- Advanced Optimization Techniques: Employs enhanced route optimization methodologies, including 2-opt, 3-opt, and Lin-Kernighan heuristics, to refine solutions.
+- Interactive Web Application: Features a built-in Flask web application for dynamic visualization of routing plans and distribution of nodes on interactive maps.
+- High Scalability: Optimized for processing extensive datasets, capable of efficiently managing thousands of nodes.
+- Comprehensive Data Visualization: Utilizes a wide array of visualization libraries such as Matplotlib, Seaborn, and Plotly for in-depth data analysis.
+- Geospatial Analysis Tools: Integrates Folium for creating engaging map visuals, along with GeoPy and Shapely for detailed geospatial data analysis.
 
-## Installation
-To set up the Meta-Heuristic Optimization Tool, clone the repository and install the required dependencies.
+## Installation Guide
+To install the Meta-Heuristic Optimization Framework, please follow these steps:
 
 ```bash
 git clone https://github.com/artuloda/meta-tool-test.git
@@ -19,7 +19,15 @@ pip install -r requirements.txt
 ```
 
 ## Flask Application
-The tool includes a Flask web application for interactive visualization and management of routing solutions.
+This framework includes a Flask-based web application for the interactive exploration and management of CVRP solutions.
+
+#### Key Web Application Features:
+- Home: Basic introduction and navigation.
+- Clients: Displays customer details.
+- Vehicles: Displays vehicles details.
+- Map: Interactive map for route visualization.
+- Graph: Dynamic graph representation of routing solutions.
+
 ```python
 # app.py
 from flask import Flask, render_template, jsonify
@@ -56,18 +64,19 @@ if __name__ == '__main__':
     app.run()
 ````
 
-To run the Flask application:
+Running the Flask Application:
 ```bash
 python app.py
 ```
+Navigate to http://localhost:5000/ in your web browser to access the application.
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
 
 ## Contact
-Arturo López Damas Oliveres  - @artuloda
+Should you have any inquiries or require further information, please contact Arturo López-Damas Oliveres via - @artuloda
 
-Project Link: https://github.com/artuloda/meta-tool-test
+Explore the project on GitHub: [Meta-Heuristic Optimization Framework for CVRP](https://github.com/artuloda/meta-tool-test)
 
 ## Acknowledgements
 - [Flask](https://flask.palletsprojects.com/en/3.0.x/)

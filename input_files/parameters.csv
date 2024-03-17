@@ -6,4 +6,5 @@ input_file_name;hospitalesEspanaDataSet.csv
 fleet_file_name;vehicles.csv
 here_API_key;cW7fYkl9rgzC2epupFUTZW1gAk56Y9PUnR_bRq6ltgI
 city_name_zip_code_list;['SEVILLA', 'CADIZ', 'HUELVA', 'MADRID', 'BARCELONA']
-TAM_POPULATION;10
+TAM_POPULATION;30
+use_all_fleet;True

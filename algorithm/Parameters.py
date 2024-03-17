@@ -14,6 +14,7 @@ class Parameters:
         self.here_API_key = str(parameters_dict['here_API_key'])
         self.city_name_zip_code_list = eval(parameters_dict['city_name_zip_code_list'])
         self.TAM_POPULATION = int(parameters_dict['TAM_POPULATION'])
+        self.use_all_fleet = parameters_dict['use_all_fleet']
 
     def __str__(self) -> str:
         class_str = 'Instance input_file_path: ' + str(self.input_file_path) + '\n'
@@ -24,4 +25,5 @@ class Parameters:
         class_str += 'Instance here_API_key: ' + str(self.here_API_key) + '\n'
         class_str += 'Instance city_name_zip_code_list: ' + str(self.city_name_zip_code_list) + '\n'
         class_str += 'Instance TAM_POPULATION: ' + str(self.TAM_POPULATION) + '\n'
+        class_str += 'Instance Flota Fija: ' + str(self.use_all_fleet) + '\n'
         return class_str

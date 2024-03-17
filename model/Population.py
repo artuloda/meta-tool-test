@@ -1,5 +1,5 @@
 from model import Individual
-
+import random
 class Population:
 
     def __init__(self, parameters, instance):
@@ -14,20 +14,35 @@ class Population:
         """
         """
         # Creation
+        options_names = {
+            1: 'Hierarchical Clustering', 
+            2: 'Compact Kmeans Clustering', 
+            3: 'Random Assignment Heuristic', 
+            4: 'Random Assignment Heuristic Minimize Fleet', 
+            5: 'Nearest Neighborg Heuristic', 
+            6: 'Routes Compact: Not stable', 
+            7: 'CVRP Or-Tools'}
+        print("Starting Algorithm...")
+        print("Algorithm Options:", options_names)
         for iteration in range(self.parameters.TAM_POPULATION):
             # print('Start Iteration:', iteration, '...')
             individual = Individual(self.parameters, self.instance)
-
-            # if iteration % 2 == 0:
-            if iteration == 1:
-                option = 1
+            if self.parameters.use_all_fleet == 'True':
+                if iteration == 0:
+                    option = 1
+                else:
+                    option = random.choice([2,3])
             else:
-                option = 2
-            option = 3 
+                if iteration == 0:
+                    option = 7
+                elif iteration == 1:
+                    option = 5
+                else:
+                    option = 4
             individual.solve_cvrp(option)
             self.individuals.append(individual)
             self.individuals_fitness.append(individual.fitness)
-            print('End Iteration:', iteration, ' FITNESS:', individual.fitness)
+            print('End Iteration:', iteration, ' Algorithm Option:', option, ' - ', options_names[option], ' FITNESS:', individual.fitness)
 
         # Evaluation
         best_solution_index = self.individuals_fitness.index(min(self.individuals_fitness))

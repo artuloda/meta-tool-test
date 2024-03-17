@@ -43,7 +43,6 @@ class Individual:
         """
         Generate an initial feasible solution for the Vehicle Routing Problem using different techniques
         """
-
         if option == 1:
             routes = self.initialize_routes_hierarchical_clustering()
         elif option == 2:
@@ -657,7 +656,7 @@ class Individual:
         routes = {vehicle.Id: [] for vehicle in self.instance.fleet_df.itertuples()}
         for vehicle_id in range(data["num_vehicles"]):
             index = routing.Start(vehicle_id)
-            print('Ruta para el vehículo', vehicle_id + 1)
+            # print('Ruta para el vehículo', vehicle_id + 1)
             while not routing.IsEnd(index):
                 node_index = manager.IndexToNode(index)
                 if node_index != data["depot"]:

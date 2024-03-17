@@ -13,8 +13,8 @@ if __name__ == '__main__':
 
     # Create Instance
     instance = algorithm.Instance(parameters)
-    print(instance.nodes_df)
-    print(instance.fleet_df)
+    # print(instance.nodes_df)
+    # print(instance.fleet_df)
 
     solution = algorithm.Solution(parameters, instance)
     solution.save_solution()    
@@ -42,8 +42,8 @@ def main():
 
     # Create Instance
     instance = algorithm.Instance(parameters)
-    print(instance.nodes_df)
-    print(instance.fleet_df)
+    # print(instance.nodes_df)
+    # print(instance.fleet_df)
 
     solution = algorithm.Solution(parameters, instance)
     solution.save_solution()    

@@ -78,7 +78,7 @@ Should you have any inquiries or require further information, please contact Art
 
 Explore the project on GitHub: [Meta-Heuristic Optimization Framework for CVRP](https://github.com/artuloda/meta-tool-test)
 
-## Used Technology
+## Python Libraies Used
 - [Flask](https://flask.palletsprojects.com/en/3.0.x/)
 - [NumPy](https://numpy.org/doc/stable/)
 - [Pandas](https://pandas.pydata.org/docs/)

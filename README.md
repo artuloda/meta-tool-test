@@ -85,4 +85,11 @@ Explore the project on GitHub: [Meta-Heuristic Optimization Framework for CVRP](
 - [Scikit-Learn](https://scikit-learn.org/stable/auto_examples/index.html)
 - [NetworkX](https://networkx.org/documentation/stable/reference/index.html)
 - [Folium](https://python-visualization.github.io/folium/latest/user_guide.html)
+- [Matplotlib](https://matplotlib.org/stable/plot_types/basic/index.html)
+- [Seaborn](https://seaborn.pydata.org/)
+- [Plotly](https://plotly.com/examples/)
+- [Shapely](https://shapely.readthedocs.io/en/stable/)
+- [GeoPy](https://geopy.readthedocs.io/en/stable/)
+- [OR-Tools CVRP](https://developers.google.com/optimization/routing/routing_options?hl=es-419)
+
 

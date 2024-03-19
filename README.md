@@ -2,10 +2,11 @@
 The Meta-Heuristic Optimization Framework is an advanced, Python-based software library designed to address the complexities of the Capacitated Vehicle Routing Problem (CVRP). By integrating state-of-the-art optimization strategies and heuristic algorithms, this tool facilitates the development of optimized routing solutions that meticulously observe vehicle capacity limitations and customer requirements.
 
 ## Key Features
-- Sophisticated Heuristics: Incorporates cutting-edge algorithms such as Nearest Neighbor and Hierarchical Clustering to construct initial, viable solutions.
-- Advanced Optimization Techniques: Employs enhanced route optimization methodologies, including 2-opt, 3-opt, and Lin-Kernighan heuristics, to refine solutions.
+- Sophisticated Heuristics: Incorporates cutting-edge algorithms such as Nearest Neighbor, Or-Tools and own heuristics to construct initial and viable solutions.
+- Clustering Techniques: Contains various clustering techniques such as K-means Clustering and  Hierarchical Clustering.
+- Advanced Optimization Techniques: Employs enhanced route optimization methodologies, including Clarke y Wright, 2-opt, 3-opt, and Lin-Kernighan heuristics, to refine solutions.
 - Interactive Web Application: Features a built-in Flask web application for dynamic visualization of routing plans and distribution of nodes on interactive maps.
-- High Scalability: Optimized for processing extensive datasets, capable of efficiently managing thousands of nodes.
+- High Scalability: Optimized for processing extensive datasets, capable of efficiently managing thousands of nodes with multiple constraints.
 - Comprehensive Data Visualization: Utilizes a wide array of visualization libraries such as Matplotlib, Seaborn, and Plotly for in-depth data analysis.
 - Geospatial Analysis Tools: Integrates Folium for creating engaging map visuals, along with GeoPy and Shapely for detailed geospatial data analysis.
 

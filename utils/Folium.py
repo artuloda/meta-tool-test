@@ -299,8 +299,8 @@ class Folium:
         """
         folder_path = folder_path + 'SPAIN_geojsons'
         files = os.listdir(folder_path) # List all files in the specified folder
-        print("Files in the folder:") # Print the list of files
-        print(files)
+        # print("Files in the folder:") # Print the list of files
+        # print(files)
         spain_zip_codes_data = dict()
         for file in files:  # Process each file in the folder        
             file_path = os.path.join(folder_path, file) # Construct the full file path

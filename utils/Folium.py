@@ -52,6 +52,8 @@ class Folium:
         """
         folium.TileLayer('openstreetmap', name='Open Street Map').add_to(map_object)
         folium.TileLayer('cartodbpositron', name='Carto BD Positron').add_to(map_object)
+        folium.TileLayer(tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr='Esri',name='Esri Satellite').add_to(map_object)
+        folium.TileLayer(tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',attr='Esri',name='Esri World Topographic Map').add_to(map_object)
         MiniMap(tile_layer='Cartodb dark_matter', position='bottomleft', toggle_display=True).add_to(map_object)
         MeasureControl(position='bottomleft').add_to(map_object)
         Geocoder(position='topleft', collapsed=True, placeholder="Geocoder Folium").add_to(map_object)

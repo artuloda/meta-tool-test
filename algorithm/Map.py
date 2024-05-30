@@ -97,7 +97,7 @@ class Map:
         layer_color = '#00008B'
         layer_txt = 'Nodos Totales'
         initial_show = False
-        dynamic = False
+        dynamic = True
         index_color = 0
         nodes_layer = self.Folium.create_feature_group_folium(self.map_object, layer_color, layer_txt, initial_show, dynamic)
         for nodes_by_province_df in nodes_by_province_df_list:

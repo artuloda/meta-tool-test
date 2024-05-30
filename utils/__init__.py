@@ -5,4 +5,4 @@ from .Here import Here
 from .IO import IO
 from .Polygon import Polygon
 from .DataGraph import DataGraph
-from .Time import Time
+from .TimeWindow import TimeWindow
